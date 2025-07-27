@@ -1,4 +1,4 @@
-# Swift Passphrases
+# Swift Passphrase Generator
 
 A modern Swift package for generating cryptographically secure passphrases using the EFF Large Wordlist. Perfect for creating memorable yet strong passwords for your applications.
 
@@ -19,17 +19,17 @@ Add SwiftPassphrases to your project using Xcode or by adding it to your `Packag
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/arraypress/swift-passphrases.git", from: "1.0.0")
+    .package(url: "https://github.com/arraypress/swift-passphrase-generator.git", from: "1.0.0")
 ]
 ```
 
 ## Quick Start
 
 ```swift
-import SwiftPassphrases
+import PassphraseGenerator
 
 // Generate a default passphrase (4 words, lowercase, hyphen-separated)
-let passphrase = Passphrase.generate()
+let passphrase = PassphraseGenerator.generate()
 // Result: "correct-horse-battery-staple"
 ```
 
@@ -39,11 +39,11 @@ let passphrase = Passphrase.generate()
 
 ```swift
 // Default: 4 words, lowercase, hyphen-separated
-let basic = Passphrase.generate()
+let basic = PassphraseGenerator.generate()
 // "aluminum-beacon-cluster-devoted"
 
 // Custom word count (automatically clamped between 2-10)
-let longer = Passphrase.generate(wordCount: 6)
+let longer = PassphraseGenerator.generate(wordCount: 6)
 // "aluminum-beacon-cluster-devoted-examine-firewall"
 ```
 
@@ -51,20 +51,20 @@ let longer = Passphrase.generate(wordCount: 6)
 
 ```swift
 // Different separators
-let dotted = Passphrase.generate(separator: ".")
+let dotted = PassphraseGenerator.generate(separator: ".")
 // "aluminum.beacon.cluster.devoted"
 
-let spaced = Passphrase.generate(separator: " ")
+let spaced = PassphraseGenerator.generate(separator: " ")
 // "aluminum beacon cluster devoted"
 
 // Different capitalization styles
-let capitalized = Passphrase.generate(casing: .capitalize)
+let capitalized = PassphraseGenerator.generate(casing: .capitalize)
 // "Aluminum-Beacon-Cluster-Devoted"
 
-let sentence = Passphrase.generate(casing: .sentenceCase)
+let sentence = PassphraseGenerator.generate(casing: .sentenceCase)
 // "Aluminum-beacon-cluster-devoted"
 
-let alternating = Passphrase.generate(casing: .alternating)
+let alternating = PassphraseGenerator.generate(casing: .alternating)
 // "aluminum-BEACON-cluster-DEVOTED"
 ```
 
@@ -73,7 +73,7 @@ let alternating = Passphrase.generate(casing: .alternating)
 ```swift
 // Use your own word list
 let customWords = ["apple", "banana", "cherry", "dragon", "elephant"]
-let custom = Passphrase.generate(
+let custom = PassphraseGenerator.generate(
     wordCount: 3,
     separator: "_",
     casing: .uppercase,
@@ -86,11 +86,11 @@ let custom = Passphrase.generate(
 
 ```swift
 // Calculate entropy for your passphrase configuration
-let entropy = Passphrase.entropy(wordCount: 4) // ~51.7 bits
-let strongEntropy = Passphrase.entropy(wordCount: 6) // ~77.5 bits
+let entropy = PassphraseGenerator.entropy(wordCount: 4) // ~51.7 bits
+let strongEntropy = PassphraseGenerator.entropy(wordCount: 6) // ~77.5 bits
 
 // Get information about the built-in wordlist
-let info = Passphrase.wordListInfo()
+let info = PassphraseGenerator.wordListInfo()
 print("Using \(info.name) with \(info.wordCount) words")
 print("Entropy per word: \(info.entropyPerWord) bits")
 ```
@@ -146,7 +146,7 @@ The default 4-word passphrase provides approximately **51.7 bits of entropy**, w
 
 ```swift
 // High security: ~77.5 bits of entropy
-let secure = Passphrase.generate(wordCount: 6)
+let secure = PassphraseGenerator.generate(wordCount: 6)
 ```
 
 ### Custom Word Lists

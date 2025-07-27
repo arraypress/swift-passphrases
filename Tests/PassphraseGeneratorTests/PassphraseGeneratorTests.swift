@@ -7,14 +7,14 @@
 //
 
 import XCTest
-@testable import SwiftPassphrases
+@testable import PassphraseGenerator
 
 final class PassphraseTests: XCTestCase {
     
     // MARK: - Basic Generation Tests
     
     func testDefaultGeneration() {
-        let passphrase = Passphrase.generate()
+        let passphrase = PassphraseGenerator.generate()
         
         // Should contain exactly 3 hyphens (4 words)
         let components = passphrase.components(separatedBy: "-")
@@ -34,7 +34,7 @@ final class PassphraseTests: XCTestCase {
         let testCases = [2, 3, 5, 6, 10]
         
         for wordCount in testCases {
-            let passphrase = Passphrase.generate(wordCount: wordCount)
+            let passphrase = PassphraseGenerator.generate(wordCount: wordCount)
             let components = passphrase.components(separatedBy: "-")
             
             XCTAssertEqual(components.count, wordCount, "Passphrase should have \(wordCount) words")
@@ -43,15 +43,15 @@ final class PassphraseTests: XCTestCase {
     
     func testWordCountBounds() {
         // Test minimum bound (should clamp to 2)
-        let tooFew = Passphrase.generate(wordCount: 1)
+        let tooFew = PassphraseGenerator.generate(wordCount: 1)
         XCTAssertEqual(tooFew.components(separatedBy: "-").count, 2, "Word count should be clamped to minimum of 2")
         
         // Test maximum bound (should clamp to 10)
-        let tooMany = Passphrase.generate(wordCount: 15)
+        let tooMany = PassphraseGenerator.generate(wordCount: 15)
         XCTAssertEqual(tooMany.components(separatedBy: "-").count, 10, "Word count should be clamped to maximum of 10")
         
         // Test negative number (should clamp to 2)
-        let negative = Passphrase.generate(wordCount: -5)
+        let negative = PassphraseGenerator.generate(wordCount: -5)
         XCTAssertEqual(negative.components(separatedBy: "-").count, 2, "Negative word count should be clamped to 2")
     }
     
@@ -59,7 +59,7 @@ final class PassphraseTests: XCTestCase {
         let separators = [".", "_", " ", "🎯", "123"]
         
         for separator in separators {
-            let passphrase = Passphrase.generate(separator: separator)
+            let passphrase = PassphraseGenerator.generate(separator: separator)
             let components = passphrase.components(separatedBy: separator)
             
             XCTAssertEqual(components.count, 4, "Should have 4 words regardless of separator")
@@ -70,17 +70,17 @@ final class PassphraseTests: XCTestCase {
     // MARK: - Casing Style Tests
     
     func testLowercaseCasing() {
-        let passphrase = Passphrase.generate(casing: .lowercase)
+        let passphrase = PassphraseGenerator.generate(casing: .lowercase)
         XCTAssertEqual(passphrase, passphrase.lowercased(), "Lowercase casing should produce all lowercase")
     }
     
     func testUppercaseCasing() {
-        let passphrase = Passphrase.generate(casing: .uppercase)
+        let passphrase = PassphraseGenerator.generate(casing: .uppercase)
         XCTAssertEqual(passphrase, passphrase.uppercased(), "Uppercase casing should produce all uppercase")
     }
     
     func testCapitalizeCasing() {
-        let passphrase = Passphrase.generate(casing: .capitalize)
+        let passphrase = PassphraseGenerator.generate(casing: .capitalize)
         let words = passphrase.components(separatedBy: "-")
         
         for word in words {
@@ -93,7 +93,7 @@ final class PassphraseTests: XCTestCase {
     }
     
     func testSentenceCaseCasing() {
-        let passphrase = Passphrase.generate(casing: .sentenceCase)
+        let passphrase = PassphraseGenerator.generate(casing: .sentenceCase)
         let words = passphrase.components(separatedBy: "-")
         
         // First word should be capitalized
@@ -109,7 +109,7 @@ final class PassphraseTests: XCTestCase {
     }
     
     func testAlternatingCasing() {
-        let passphrase = Passphrase.generate(wordCount: 4, casing: .alternating)
+        let passphrase = PassphraseGenerator.generate(wordCount: 4, casing: .alternating)
         let words = passphrase.components(separatedBy: "-")
         
         XCTAssertEqual(words.count, 4, "Should have 4 words for this test")
@@ -128,7 +128,7 @@ final class PassphraseTests: XCTestCase {
     
     func testCustomWordList() {
         let customWords = ["apple", "banana", "cherry", "dog", "elephant"]
-        let passphrase = Passphrase.generate(wordCount: 3, customWords: customWords)
+        let passphrase = PassphraseGenerator.generate(wordCount: 3, customWords: customWords)
         let words = passphrase.components(separatedBy: "-")
         
         XCTAssertEqual(words.count, 3, "Should have 3 words")
@@ -141,7 +141,7 @@ final class PassphraseTests: XCTestCase {
     
     func testCustomWordListWithDifferentCasing() {
         let customWords = ["RED", "green", "BluE"]
-        let passphrase = Passphrase.generate(wordCount: 3, casing: .lowercase, customWords: customWords)
+        let passphrase = PassphraseGenerator.generate(wordCount: 3, casing: .lowercase, customWords: customWords)
         let words = passphrase.components(separatedBy: "-")
         
         // All words should be lowercase regardless of input casing
@@ -152,7 +152,7 @@ final class PassphraseTests: XCTestCase {
     
     func testSingleWordCustomList() {
         let customWords = ["onlyword"]
-        let passphrase = Passphrase.generate(wordCount: 3, customWords: customWords)
+        let passphrase = PassphraseGenerator.generate(wordCount: 3, customWords: customWords)
         
         // Should generate "onlyword-onlyword-onlyword"
         XCTAssertEqual(passphrase, "onlyword-onlyword-onlyword", "Should repeat the single word")
@@ -162,13 +162,13 @@ final class PassphraseTests: XCTestCase {
     
     func testEntropyCalculation() {
         // Test default EFF wordlist (7776 words)
-        let entropy4Words = Passphrase.entropy(wordCount: 4)
+        let entropy4Words = PassphraseGenerator.entropy(wordCount: 4)
         let expectedEntropy = 4.0 * log2(7776.0) // ~51.7 bits
         
         XCTAssertEqual(entropy4Words, expectedEntropy, accuracy: 0.1, "Entropy calculation should be accurate")
         
         // Test custom word list size
-        let entropy5WordsCustom = Passphrase.entropy(wordCount: 5, wordListSize: 1000)
+        let entropy5WordsCustom = PassphraseGenerator.entropy(wordCount: 5, wordListSize: 1000)
         let expectedCustom = 5.0 * log2(1000.0) // ~49.8 bits
         
         XCTAssertEqual(entropy5WordsCustom, expectedCustom, accuracy: 0.1, "Custom entropy calculation should be accurate")
@@ -176,20 +176,20 @@ final class PassphraseTests: XCTestCase {
     
     func testEntropyEdgeCases() {
         // Zero word count should return 0
-        XCTAssertEqual(Passphrase.entropy(wordCount: 0), 0.0, "Zero words should have zero entropy")
+        XCTAssertEqual(PassphraseGenerator.entropy(wordCount: 0), 0.0, "Zero words should have zero entropy")
         
         // Zero word list size should return 0
-        XCTAssertEqual(Passphrase.entropy(wordCount: 4, wordListSize: 0), 0.0, "Zero word list size should have zero entropy")
+        XCTAssertEqual(PassphraseGenerator.entropy(wordCount: 4, wordListSize: 0), 0.0, "Zero word list size should have zero entropy")
         
         // Negative values should return 0
-        XCTAssertEqual(Passphrase.entropy(wordCount: -1), 0.0, "Negative word count should return zero entropy")
-        XCTAssertEqual(Passphrase.entropy(wordCount: 4, wordListSize: -100), 0.0, "Negative word list size should return zero entropy")
+        XCTAssertEqual(PassphraseGenerator.entropy(wordCount: -1), 0.0, "Negative word count should return zero entropy")
+        XCTAssertEqual(PassphraseGenerator.entropy(wordCount: 4, wordListSize: -100), 0.0, "Negative word list size should return zero entropy")
     }
     
     // MARK: - Word List Info Tests
     
     func testWordListInfo() {
-        let info = Passphrase.wordListInfo()
+        let info = PassphraseGenerator.wordListInfo()
         
         XCTAssertEqual(info.name, "EFF Large Wordlist", "Should return correct wordlist name")
         XCTAssertEqual(info.wordCount, 7776, "Should return correct word count")
@@ -205,7 +205,7 @@ final class PassphraseTests: XCTestCase {
         
         // Generate many passphrases and ensure they're mostly unique
         for _ in 0..<iterations {
-            let passphrase = Passphrase.generate()
+            let passphrase = PassphraseGenerator.generate()
             generatedPassphrases.insert(passphrase)
         }
         
@@ -224,7 +224,7 @@ final class PassphraseTests: XCTestCase {
         
         // Generate many 2-word passphrases and check first word distribution
         for _ in 0..<iterations {
-            let passphrase = Passphrase.generate(wordCount: 2, customWords: customWords)
+            let passphrase = PassphraseGenerator.generate(wordCount: 2, customWords: customWords)
             let firstWord = passphrase.components(separatedBy: "-")[0]
             results[firstWord, default: 0] += 1
         }
@@ -245,7 +245,7 @@ final class PassphraseTests: XCTestCase {
     func testBuiltInWordListLoads() {
         // This test ensures the built-in word list can be loaded
         // If the test fails, it means the eff-large-wordlist.txt file is missing or corrupted
-        let passphrase = Passphrase.generate()
+        let passphrase = PassphraseGenerator.generate()
         
         // If we get here without crashing, the word list loaded successfully
         XCTAssertFalse(passphrase.isEmpty, "Should generate non-empty passphrase with built-in word list")
@@ -253,7 +253,7 @@ final class PassphraseTests: XCTestCase {
     
     func testBuiltInWordListStructure() {
         // Generate a passphrase to trigger word list loading
-        _ = Passphrase.generate()
+        _ = PassphraseGenerator.generate()
         
         // Check if we can get statistics
         let stats = WordList.getStatistics()
@@ -268,7 +268,7 @@ final class PassphraseTests: XCTestCase {
     func testGenerationPerformance() {
         measure {
             for _ in 0..<1000 {
-                _ = Passphrase.generate()
+                _ = PassphraseGenerator.generate()
             }
         }
     }
@@ -278,7 +278,7 @@ final class PassphraseTests: XCTestCase {
         
         measure {
             for _ in 0..<1000 {
-                _ = Passphrase.generate(customWords: customWords)
+                _ = PassphraseGenerator.generate(customWords: customWords)
             }
         }
     }
@@ -293,14 +293,14 @@ final class PassphraseTests: XCTestCase {
     
     func testVeryLongSeparator() {
         let longSeparator = String(repeating: "🎯", count: 100)
-        let passphrase = Passphrase.generate(separator: longSeparator)
+        let passphrase = PassphraseGenerator.generate(separator: longSeparator)
         
         XCTAssertTrue(passphrase.contains(longSeparator), "Should handle very long separators")
     }
     
     func testUnicodeWordsInCustomList() {
         let unicodeWords = ["café", "naïve", "résumé", "🦄", "🎯"]
-        let passphrase = Passphrase.generate(wordCount: 3, customWords: unicodeWords)
+        let passphrase = PassphraseGenerator.generate(wordCount: 3, customWords: unicodeWords)
         let words = passphrase.components(separatedBy: "-")
         
         XCTAssertEqual(words.count, 3, "Should handle Unicode words correctly")

@@ -1,6 +1,6 @@
 //
-//  Passphrase.swift
-//  SwiftPassphrases
+//  PassphraseGenerator.swift
+//  PassphraseGenerator
 //
 //  Secure passphrase generation using cryptographically secure random selection
 //  Created on 27/07/2025.
@@ -11,7 +11,7 @@ import Security
 
 // MARK: - Main Public API
 
-public struct Passphrase {
+public struct PassphraseGenerator {
     
     /// Generate a secure passphrase with default settings.
     ///
@@ -21,13 +21,109 @@ public struct Passphrase {
     ///
     /// ## Example
     /// ```swift
-    /// let passphrase = Passphrase.generate()
+    /// let passphrase = PassphraseGenerator.generate()
     /// // Result: "correct-horse-battery-staple"
     /// ```
     ///
     /// - Returns: A 4-word passphrase with approximately 52 bits of entropy
     public static func generate() -> String {
         return generate(wordCount: 4, separator: "-", casing: .lowercase)
+    }
+    
+    /// Generate multiple passphrases with default settings.
+    ///
+    /// Efficiently generates multiple passphrases using the same configuration.
+    /// Each passphrase is independently generated with fresh randomness.
+    ///
+    /// ## Example
+    /// ```swift
+    /// let passphrases = PassphraseGenerator.generateMultiple(count: 5)
+    /// // Result: ["correct-horse-battery-staple", "aluminum-beacon-cluster-devoted", ...]
+    /// ```
+    ///
+    /// - Parameter count: Number of passphrases to generate (1-1000, defaults to 10)
+    /// - Returns: Array of generated passphrases
+    public static func generateMultiple(count: Int = 10) -> [String] {
+        return generateMultiple(
+            count: count,
+            wordCount: 4,
+            separator: "-",
+            casing: .lowercase
+        )
+    }
+    
+    /// Generate multiple passphrases with custom options.
+    ///
+    /// Creates multiple passphrases using the specified configuration.
+    /// Count is automatically clamped between 1 and 1000 for performance.
+    ///
+    /// ## Example
+    /// ```swift
+    /// let passphrases = PassphraseGenerator.generateMultiple(
+    ///     count: 3,
+    ///     wordCount: 5,
+    ///     separator: ".",
+    ///     casing: .capitalize
+    /// )
+    /// // Result: ["Aluminum.Beacon.Cluster.Devoted.Examine", ...]
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - count: Number of passphrases to generate (1-1000, defaults to 10)
+    ///   - wordCount: Number of words per passphrase (2-10, defaults to 4)
+    ///   - separator: String to place between words (defaults to "-")
+    ///   - casing: How to format the word capitalization (defaults to lowercase)
+    /// - Returns: Array of generated passphrases
+    public static func generateMultiple(
+        count: Int = 10,
+        wordCount: Int = 4,
+        separator: String = "-",
+        casing: CasingStyle = .lowercase
+    ) -> [String] {
+        
+        let clampedCount = max(1, min(1000, count))
+        
+        return (0..<clampedCount).map { _ in
+            generate(wordCount: wordCount, separator: separator, casing: casing)
+        }
+    }
+    
+    /// Generate multiple passphrases using a custom word list.
+    ///
+    /// Creates multiple passphrases using a custom array of words.
+    /// Useful for generating many passphrases in non-English languages.
+    ///
+    /// ## Example
+    /// ```swift
+    /// let customWords = ["apple", "banana", "cherry", "dog", "elephant"]
+    /// let passphrases = PassphraseGenerator.generateMultiple(
+    ///     count: 3,
+    ///     wordCount: 3,
+    ///     customWords: customWords
+    /// )
+    /// // Result: ["apple-cherry-dog", "banana-elephant-apple", ...]
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - count: Number of passphrases to generate (1-1000, defaults to 10)
+    ///   - wordCount: Number of words per passphrase (2-10, defaults to 4)
+    ///   - separator: String to place between words (defaults to "-")
+    ///   - casing: How to format the word capitalization (defaults to lowercase)
+    ///   - customWords: Array of words to select from instead of built-in list
+    /// - Returns: Array of generated passphrases
+    public static func generateMultiple(
+        count: Int = 10,
+        wordCount: Int = 4,
+        separator: String = "-",
+        casing: CasingStyle = .lowercase,
+        customWords: [String]
+    ) -> [String] {
+        
+        let clampedCount = max(1, min(1000, count))
+        
+        return (0..<clampedCount).map { _ in
+            generate(wordCount: wordCount, separator: separator, casing: casing, customWords: customWords)
+        }
     }
     
     /// Generate a passphrase with custom options using the built-in EFF wordlist.
@@ -38,7 +134,7 @@ public struct Passphrase {
     ///
     /// ## Example
     /// ```swift
-    /// let passphrase = Passphrase.generate(
+    /// let passphrase = PassphraseGenerator.generate(
     ///     wordCount: 5,
     ///     separator: ".",
     ///     casing: .capitalize
@@ -73,7 +169,7 @@ public struct Passphrase {
     /// ## Example
     /// ```swift
     /// let customWords = ["apple", "banana", "cherry", "dog", "elephant"]
-    /// let passphrase = Passphrase.generate(
+    /// let passphrase = PassphraseGenerator.generate(
     ///     wordCount: 3,
     ///     separator: "_",
     ///     casing: .uppercase,
@@ -110,7 +206,7 @@ public struct Passphrase {
     ///
     /// ## Example
     /// ```swift
-    /// let entropy = Passphrase.entropy(wordCount: 4, wordListSize: 7776)
+    /// let entropy = PassphraseGenerator.entropy(wordCount: 4, wordListSize: 7776)
     /// // Result: ~51.7 bits (log2(7776^4))
     /// ```
     ///
@@ -135,7 +231,7 @@ public struct Passphrase {
     ///
     /// ## Example
     /// ```swift
-    /// let info = Passphrase.wordListInfo()
+    /// let info = PassphraseGenerator.wordListInfo()
     /// print("Words: \(info.wordCount), Entropy per word: \(info.entropyPerWord) bits")
     /// // Result: "Words: 7776, Entropy per word: 12.92 bits"
     /// ```
@@ -193,7 +289,7 @@ public struct WordListInfo {
 
 // MARK: - Internal Implementation
 
-private extension Passphrase {
+private extension PassphraseGenerator {
     
     /// Internal method that handles all passphrase generation logic.
     ///
